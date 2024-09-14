@@ -726,11 +726,11 @@ svg.clip-side-icon {
         width: 100%;
     }
 
-    #startend-btn {
+    /* #startend-btn {
         /* width: 120px; */
         /* height: 120px; */
         /* margin-bottom: 20px; */
-    }
+    /* } */
 
     .startend-icon {
         width: 70px;
@@ -815,11 +815,11 @@ svg.clip-side-icon {
         margin-top: 30px !important;
     }
 
-    #startend-btn {
+    /* #startend-btn { */
         /* width: 100px; */
         /* height: 100px; */
         /* margin-bottom: 20px; */
-    }
+    /* } */
 
     .startend-icon {
         width: 50px;
