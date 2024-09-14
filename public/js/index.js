@@ -72,6 +72,10 @@ class Time {
         this.milliSecs = Math.floor( time ) % 1000;
     }
 
+    static format(timePart) {   // timeParts: hrs, mins, secs, milliSecs
+        return (timePart >= 10)? String(timePart) : 0 + String(timePart);
+    }
+
     format(timePart) {   // timeParts: hrs, mins, secs, milliSecs
         return (timePart >= 10)? String(timePart) : 0 + String(timePart);
     }
@@ -130,9 +134,9 @@ if(getUserMediaReady) {
 
 function createAudioClip(audioChunks, audioDuration) {
 
-    const blob = new Blob(audioChunks, { type: "audio/ogg; codecs=opus" });
+    const blob = new Blob(audioChunks, { type: "audio/webm" });
     const audioURL = window.URL.createObjectURL(blob);
-    audioChunks = [];
+    audioChunks.length = 0;
 
     let audioName;
 
@@ -141,33 +145,41 @@ function createAudioClip(audioChunks, audioDuration) {
         audioName = clipName;
         const recAudio = new RecordedAudio(audioName, audioURL, audioDuration);
         recAudios.push(recAudio);
+        console.log(recAudios);
     
         createAudioClipElement(recAudio);
     })
 }
 
 function createAudioClipElement(recAudio) {
-    const newClip = document.querySelector(".sound-clip").cloneNode(true);
+    const {time, mins, secs} = recAudio.duration;
+    const newClip = document.querySelector("#audio-clip-temp").content.querySelector('.sound-clip').cloneNode(true);
     newClip.style.display = "flex";
     const clipTitle = newClip.querySelector("p.sound-clip-title");
+    const clipSeekRange = newClip.querySelector('#sound-clip-play-progress');
     const clipVolume = newClip.querySelector("input.sound-clip-vol-range");
     const clipTime = newClip.querySelector(".sound-clip-time");
     const clipDownloadBtn = newClip.querySelector("a[data-clip-download]");
-    const audioElement = document.createElement("audio");
+    const audioElement = new Audio();
+    audioElement.setAttribute('preload', 'metadata');
 
     clipTitle.innerText = recAudio.name;
+    clipSeekRange.step = 1;
+    clipSeekRange.max = Math.ceil(time / 1000);
     clipVolume.value = recAudio.volume;
-    const {mins, secs} = recAudio.duration;
-    clipTime.innerText = recAudio.duration.format(mins) + ":" + recAudio.duration.format(secs);
+    clipTime.innerText = recAudio.duration.format(mins) + ":" + recAudio.duration.format(Math.ceil(time / 1000));
     clipDownloadBtn.setAttribute("href", recAudio.url);
-    clipDownloadBtn.setAttribute("download", recAudio.name + ".ogg");
+    clipDownloadBtn.setAttribute("download", recAudio.name + ".webm");
     audioElement.src = recAudio.url;
+    audioElement.setAttribute('data-duration', time);
+    
+    console.dir(audioElement);
 
     newClip.appendChild(audioElement);
     document.getElementById("sound-clips").appendChild(newClip);
 
     recAudioElements.push(audioElement);
-    controlClipEvents();
+    controlClipEvents(newClip);
 }
 
 function askClipName() {
@@ -224,6 +236,7 @@ recBtn.addEventListener("click", function(e) {
             toggleRecIcon();
             recBtn.style.background = "linear-gradient(230deg, rgb(255, 101, 132), rgb(156, 36, 72))";
         } else {
+            console.log('stopping recorder')
             RECORDER.stop();
             isRecording = false;
             toggleRecIcon();
@@ -244,56 +257,97 @@ function toggleRecIcon() {
 }
 
 
-function controlClipEvents() {
+function controlClipEvents(soundClip) {
     if (isRecording) return;
-    recAudioElements.forEach(audio => {
-        const playBar = audio.closest("article.sound-clip");   // it's the parent '<article>' element
-        const playpauseBtn = playBar.querySelector("button[data-play-btn]");
-        const muteBtn = playBar.querySelector("button[data-mute-btn]");
-        const deleteBtn = playBar.querySelector("button[data-clip-delete]");
-        const audioProgressRange = playBar.querySelector("#sound-clip-progress-range");
-        const audioPlayProgress = playBar.querySelector("#sound-clip-play-progress");
-        const audioRangeInput = playBar.querySelector("input.sound-clip-vol-range");
 
-        audio.addEventListener("timeupdate", function() {
-            audioPlayProgress.style.width = (100 * audio.currentTime / audio.duration) + "%";
-        }) 
+    const audio = soundClip.querySelector('audio');
 
-        audioRangeInput.addEventListener("input", function(e) {
-            audio.volume = audioRangeInput.value;
-        })
+    const duration = +audio.getAttribute('data-duration');
+    const playpauseBtn = soundClip.querySelector("button[data-play-btn]");
+    const muteBtn = soundClip.querySelector("button[data-mute-btn]");
+    const playBarTime = soundClip.querySelector('.sound-clip-time');
+    const deleteBtn = soundClip.querySelector("button[data-clip-delete]");
+    // const audioProgressRange = playBar.querySelector("#sound-clip-progress-range");
+    const audioPlayProgressRange = soundClip.querySelector("#sound-clip-play-progress");
+    const audioVolumeRangeInput = soundClip.querySelector("input.sound-clip-vol-range");
 
-        document.body.addEventListener("click", function(e) {
-            switch(e.target) {
-                case playpauseBtn:
-                    togglePlayPause(audio);
-                    break;
-                case muteBtn:
-                    audio.muted = !audio.muted;
-                    break;
-                case audioProgressRange:
-                    changeCurrentTime(audio, e.target, e.offsetX);
-                    break;
-                case deleteBtn:
-                    playBar.remove();
-                    recAudios.splice(recAudios.findIndex(recAudio => {
-                        recAudio.url === audio.url; 
-                    }),1)
-                    break;
-            }
-        })
+    audio.addEventListener('play', function(e) {
+        audio.closest('.sound-clip').classList.add('playing');
     })
+    audio.addEventListener('pause', function(e) {
+        audio.closest('.sound-clip').classList.remove('playing');
+    })
+
+    audio.addEventListener("timeupdate", function() {
+        const curntTime = Math.ceil(audio.currentTime);
+        const curntPercent = 100 * curntTime / Math.ceil(duration / 1000);
+        audioPlayProgressRange.style.setProperty('--play-progress-val', CSS.percent(curntPercent));
+        audioPlayProgressRange.value = curntTime;
+
+        if (!audio.paused) {
+            playBarTime.innerText = Time.format(Math.floor(audio.currentTime / 60)) + ":" + Time.format( curntTime );
+        } else {
+            playBarTime.innerText = Time.format(Math.floor(duration / (1000 * 60))) + ":" + Time.format( (duration / 1000).toFixed(0) );
+        }
+    }) 
+
+    audioPlayProgressRange.addEventListener("input", function(e) {
+        audio.currentTime = audioPlayProgressRange.value;
+    })
+
+    audio.addEventListener('volumechange', function(e) {
+        const volPercent = 100 * audio.volume;
+        audioVolumeRangeInput.style.setProperty('--vol-progress-val', CSS.percent(volPercent));
+        audioVolumeRangeInput.value = audio.volume;
+
+        if (audio.volume <= 0 &&  !audio.closest('.sound-clip').classList.contains('muted')) {
+            audio.closest('.sound-clip').classList.add('muted');
+        } else if (audio.closest('.sound-clip').classList.contains('muted')) {
+            audio.closest('.sound-clip').classList.remove('muted');
+        }
+    })
+
+    audioVolumeRangeInput.addEventListener("input", function(e) {
+        audio.volume = audioVolumeRangeInput.value;
+    })
+
+    playpauseBtn.addEventListener('click', e => {
+        const { target } = e;
+
+        togglePlayPause( target.closest('.sound-clip').querySelector('audio') );
+        e.stopImmediatePropagation();
+    })
+
+    muteBtn.addEventListener('click', e => {
+        const { target } = e;
+
+        audio.volume = (audio.volume > 0) ? 0 : 1;
+        audio.muted = !audio.muted;
+        audio.closest('.sound-clip').classList.toggle('muted');
+        e.stopImmediatePropagation();
+    })
+
+    deleteBtn.addEventListener('click', e => {
+        const { target } = e;
+        
+        target.closest("button[data-clip-delete]").closest('.sound-clip').remove();
+        let recAudioIndex = recAudios.findIndex(recAudio => recAudio.url === audio.src);
+        recAudios.splice(recAudioIndex,1)
+        e.stopImmediatePropagation();
+    })
+
 }
 /*-------------------------------------- */
 
 
 function togglePlayPause(audio) {
+    console.log(audio);
 
     if (audio.paused) {
         [...document.querySelectorAll("audio")].filter(otherAudio => otherAudio.src !== audio.src).forEach(otherAudio => {
             if (!otherAudio.paused) {
                 otherAudio.pause();
-                otherAudio.currentTime = 0;
+                // otherAudio.currentTime = 0;
             }
         })
     }
@@ -301,7 +355,7 @@ function togglePlayPause(audio) {
     if (audio.paused) {
         audio.play();
         CURRENT_AUDIO = audio;
-        CURRENT_AUDIO_PROGRESS = audio.closest("article.sound-clip").querySelector("progress");
+        CURRENT_AUDIO_PROGRESS = audio.closest(".sound-clip").querySelector("progress");
     } else {
         audio.pause();
         CURRENT_AUDIO = null;
