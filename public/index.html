@@ -3,16 +3,15 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="description" content="web dictaphone" >
-    <meta name="keywords" content="audio recording, dictaphone/." >
-    <meta name="author" content="Parsa.F" >
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-
-    <link rel="icon" href="https://loremflickr.com/50/50">
+    <meta name="author" content="Parsa Farahani" >
+    <meta name="description" content="voice recorder" >
+    <meta name="viewport" content="width=device-width , initial-scale=1.0">
+    <title>ٰVoice Recorder</title>
 
     <link rel="stylesheet" href="css/index.css" >
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" >
+
+    <script src="js/index.js" defer></script>
 </head>
 <body>
     
@@ -27,10 +26,10 @@
                 </div>
             </div>
             <div id="main-controls" >
-                <a id="startend-btn" data-disabled="false" >
+                <button id="startend-btn" type="button" disabled data-disabled="false" >
                     <svg id="start-icon" class="animate__animated animate__fadeIn startend-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 28 28"><path fill="currentColor" d="M14 2a4.5 4.5 0 0 0-4.5 4.5v8a4.5 4.5 0 1 0 9 0v-8A4.5 4.5 0 0 0 14 2M7.5 13.75a.75.75 0 1 0-1.5 0v.75a8 8 0 0 0 7.25 7.965v2.785a.75.75 0 0 0 1.5 0v-2.785A8 8 0 0 0 22 14.5v-.75a.75.75 0 1 0-1.5 0v.75a6.5 6.5 0 1 1-13 0z"/></svg>
                     <svg id="end-icon" class="animate__animated animate__fadeIn startend-icon" style="display: none;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256"><path fill="currentColor" d="M216 55.27v145.46A15.29 15.29 0 0 1 200.73 216H55.27A15.29 15.29 0 0 1 40 200.73V55.27A15.29 15.29 0 0 1 55.27 40h145.46A15.29 15.29 0 0 1 216 55.27"/></svg>
-                </a>
+                </button>
             </div> 
         </div>
         <div class="bottom-area">
@@ -44,9 +43,10 @@
                                 <svg class="sound-clip-playbar-icon" data-play-icon xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256"><path fill="currentColor" d="M240 128a15.74 15.74 0 0 1-7.6 13.51L88.32 229.65a16 16 0 0 1-16.2.3A15.86 15.86 0 0 1 64 216.13V39.87a15.86 15.86 0 0 1 8.12-13.82a16 16 0 0 1 16.2.3l144.08 88.14A15.74 15.74 0 0 1 240 128"/></svg>
                             </button>
                             <div id="sound-clip-progress-cont" >
-                                <div id="sound-clip-play-progress" >
+                                <input id="sound-clip-play-progress" type="range" name="currenttime" value="0" >
+                                <!-- <div id="sound-clip-play-progress" >
                                     <div id="sound-clip-play-progress-thumb" ></div>
-                                </div>
+                                </div> -->
                             </div>
                             <span class="sound-clip-time" >00:00</span>
                             <div class="clip-vol-controls-cont" >
@@ -82,8 +82,6 @@
 
         <div id="cont-left-border"></div>
         <div id="cont-right-border" ></div>
-        <div id="cont-left-style-angle"></div>
-        <div id="cont-right-style-angle"></div>
     </div>
 
     <div id="soundclip-name-modal-cont">
@@ -99,6 +97,6 @@
         </form>
     </div>
 
-    <script src="js/index.js"></script>
+
 </body>
 </html>

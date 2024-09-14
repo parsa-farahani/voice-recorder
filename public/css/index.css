@@ -1,4 +1,11 @@
+:root {
+    /* colors */
+    --main-bg: #111;
+    --purple-1-c: rgb(155, 149, 255);
 
+    /* progress */
+    --play-progress-val: 0%;
+}
 
 *, *::before, *::after {
     box-sizing: border-box;
@@ -15,7 +22,7 @@
 body {
     width: 100%;
     margin: 0;
-    background-color: rgb(29, 29, 29);
+    background-color: var(--main-bg);
 
     font-size: 2rem;
     font-family: Arial, Helvetica, sans-serif;
@@ -40,7 +47,7 @@ input:active {
     margin: 0 auto;
     margin-top: 40px;
     padding: 10px;
-    background-color: rgb(29, 29, 29);
+    background-color: var(--main-bg);
     border-radius: 8px;
     /* border: 3px solid rgb(152, 101, 255); */
 }
@@ -149,13 +156,13 @@ input:active {
     top: 0;
     left: 0;
 
-    background: linear-gradient(90deg, rgba(29,29,29,1), rgba(29,29,29,0));
+    background: linear-gradient(90deg, var(--main-bg), transparent);
 }
 
 .visualizer-cont-gradient[data-right] {
     top: 0;
     right: 0;    
-    background: linear-gradient(-90deg, rgba(29,29,29,1), rgba(29,29,29,.2));
+    background: linear-gradient(-90deg, var(--main-bg), transparent);
 }
 
 canvas#visualizer {
@@ -205,14 +212,18 @@ canvas#visualizer {
 
     z-index: 1;
 }
-#startend-btn:hover {
+#startend-btn:not([disabled]):hover {
     filter: brightness(.9);
 }
-#startend-btn:hover .startend-icon {
+#startend-btn:not([disabled]):hover .startend-icon {
     transform: translateY(-2px);
 }
-#startend-btn:active {
+#startend-btn:not([disabled]):active {
     box-shadow: 0 0 30px 0 rgba(0, 0, 0, .15);
+}
+#startend-btn[disabled] {
+    opacity: .5;
+    cursor: default;
 }
 
 .startend-icon {
@@ -402,11 +413,36 @@ div.sound-clip-playbar {
 }
 
 #sound-clip-play-progress {
-    width: 0%;
-    height: 100%;
-    background-color: rgba(172, 153, 255, 1);
 
-    position: relative;
+    appearance: none;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    background-color: transparent;
+    background-image: 
+        linear-gradient(
+            90deg,
+            var(--purple-1-c) var(--progress-val),
+            transparent var(--progress-val),
+            transparent
+        )
+    ;
+
+    position: absolute;
+    left: 0;
+    top: 50%;
+    translate: 0% -50%;
+}
+#sound-clip-play-progress::-webkit-slider-runnable-track {
+    background-color: transparent;
+}
+#sound-clip-play-progress::-webkit-slider-thumb {
+    appearance: none;
+    width: 12px;
+    height: 12px;
+    background-color: rgba(172, 153, 255, 1);
+    border-radius: 50%;
+    cursor: pointer;
 }
 
 #sound-clip-play-progress-thumb {
@@ -543,7 +579,8 @@ svg.clip-side-icon {
     margin: 0;
     padding: 0;
     padding: 20px;
-    background-color: rgb(20, 20, 20);
+    background-color: rgba(255,255,255,.1);
+    backdrop-filter: blur(40px);
     border-radius: 10px;
     border: 1px solid rgba(128, 128, 128, 0.3);
 

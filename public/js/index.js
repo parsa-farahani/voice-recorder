@@ -9,6 +9,9 @@ const startIcon = document.getElementById("start-icon");
 const endIcon = (document.getElementById("end-icon")).cloneNode(true);
 endIcon.style.display = "block";
 
+// initial setup
+recBtn.disabled = false;
+
 
 // Visualiser setup - create web audio api context and canvas
 let audioCtx;   // AudioContext, for visualizing audio
@@ -115,9 +118,12 @@ if(getUserMediaReady) {
         })
 
     })
-    .catch(error => console.log(error.message));
+    .catch(error => {
+        recBtn.disabled = true;
+        console.warn(`Error accessing user-media, audio-permission denied: ${error.message}`);
+    });
 } else {
-    console.log("'getUserMedia' is not supported in this browser.");
+    console.warn("getUserMedia' is not supported in this browser.");
 }
 
 
@@ -173,7 +179,6 @@ function askClipName() {
             const clipNameForm = e.target.closest("#soundclip-name-modal-form");
             const clipNameInput = clipNameForm.querySelector("#soundclip-name-input");
             clipname = clipNameInput.value || "New clip";
-            console.log(clipname);
             resolve(clipname);
             clipNameModal.style.display = "none";
             // clipNameInput.value = "";
@@ -212,16 +217,21 @@ function updateRecTime(startTime) {
 
 
 recBtn.addEventListener("click", function(e) {
-    if (!isRecording) {
-        RECORDER.start();
-        isRecording = true;
-        toggleRecIcon();
-        recBtn.style.background = "linear-gradient(230deg, rgb(255, 101, 132), rgb(156, 36, 72))";
-    } else {
-        RECORDER.stop();
-        isRecording = false;
-        toggleRecIcon();
-        recBtn.style.background = "";
+    try {
+        if (!isRecording) {
+            RECORDER.start();
+            isRecording = true;
+            toggleRecIcon();
+            recBtn.style.background = "linear-gradient(230deg, rgb(255, 101, 132), rgb(156, 36, 72))";
+        } else {
+            RECORDER.stop();
+            isRecording = false;
+            toggleRecIcon();
+            recBtn.style.background = "";
+        }
+    } catch (error) {
+        recBtn.disabled = true;
+        console.warn(`Error - Permission denied: please check audio-recording permission and reload the page - ${error}`);
     }
 })
 
@@ -292,8 +302,6 @@ function togglePlayPause(audio) {
         audio.play();
         CURRENT_AUDIO = audio;
         CURRENT_AUDIO_PROGRESS = audio.closest("article.sound-clip").querySelector("progress");
-        console.log(CURRENT_AUDIO);
-        console.log(CURRENT_AUDIO_PROGRESS);
     } else {
         audio.pause();
         CURRENT_AUDIO = null;
@@ -308,14 +316,11 @@ function changeCurrentTime(audio, progress, offsetX) {
     let duration;
     recAudios.forEach(recAudio => {
         if (recAudio.url === audio.src) {
-            console.log(recAudio.duration);
             duration = recAudio.duration.fullSecs;
         }
     } );
 
-    console.log(audio.currentTime);
     audio.currentTime = clickPos * duration ;
-    console.log(audio.currentTime);
 }
 
 
@@ -352,7 +357,7 @@ function visualize(stream) {
     
         analyser.getByteTimeDomainData(dataArray);
     
-        canvasCtx.fillStyle = "rgb(29, 29, 29)";
+        canvasCtx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--main-bg');
         canvasCtx.fillRect(0, 0, WIDTH, HEIGHT);
     
         canvasCtx.lineWidth = 2;
