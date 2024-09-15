@@ -127,6 +127,7 @@ if(getUserMediaReady) {
         console.warn(`Error accessing user-media, audio-permission denied: ${error.message}`);
     });
 } else {
+    recBtn.disabled = true;
     console.warn("getUserMedia' is not supported in this browser.");
 }
 
