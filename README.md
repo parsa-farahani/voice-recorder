@@ -1,6 +1,10 @@
 # Voice Recorder App
 
 ## Preview
+<<<<<<< HEAD
+=======
+[![Voice Recorder App Preview](public/assets/screenshots/sc-3.png)](https://your-live-demo-url.com)
+>>>>>>> a6df2af410a58047276383db204e3a7bbb1e6594
 
 ## Overview
 The **Voice Recorder App** is a web application that allows users to record their voice using the latest web technologies. By leveraging the `getUserMedia` and `MediaRecorder` APIs, users can easily capture audio, save it, and play it back directly on the site. This app is perfect for creating quick voice notes, podcasts, or simply experimenting with audio recordings.
@@ -36,5 +40,5 @@ To run this application, you will need:
 
 
   - For any inquiries or feedback, feel free to reach out to me at aiparsa83@gmail.com
-text
+
 
