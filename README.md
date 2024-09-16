@@ -19,6 +19,7 @@ The **Voice Recorder App** is a web application that allows users to record thei
   - **JavaScript**: For implementing the core functionalities and interactivity.
 
 - **APIs**:
+  - **HTMLMediaElement API (Audio)**: controlling audio element (play, pause, volume-change, ...).
   - **MediaDevices API (getUserMedia)**: Accesses audio input from the user's microphone.
   - **MediaRecorder API**: Facilitates the recording of audio streams and enables saving the recordings.
   - **AudioContext API**: Provides visual feedback of the audio being recorded on a canvas.
